@@ -19,7 +19,7 @@ public class Test extends OpMode {
     DcMotor right;
 
     //magic numbers
-    float POWER = 0.75f; /* [-1, 1] */
+    float POWER = 0.25f; /* [-1, 1] */
     final long RUN_TIME = 3000; /* (0, infinity) */
     final long BREAK_TIME = 1000; /* (0, infinity) */
 
@@ -39,6 +39,7 @@ public class Test extends OpMode {
 
         left.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         right.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
 
         //telemetry
         //print encoder values to console
@@ -73,6 +74,7 @@ public class Test extends OpMode {
                 //initialize counter
 
                 if (System.currentTimeMillis() >= (init_time + RUN_TIME)) {
+                    init_time = System.currentTimeMillis();
                     state = 1;
                 }
 
@@ -85,6 +87,7 @@ public class Test extends OpMode {
                 right.setPower(0);
 
                 if (System.currentTimeMillis() >= (init_time + BREAK_TIME)) {
+                    init_time = System.currentTimeMillis();
                     state = 2;
                 }
 
@@ -97,6 +100,7 @@ public class Test extends OpMode {
                 right.setPower((-1) * POWER);
 
                 if (System.currentTimeMillis() >= (init_time + RUN_TIME)) {
+                    init_time = System.currentTimeMillis();
                     state = 3;
                 }
 
@@ -109,6 +113,7 @@ public class Test extends OpMode {
                 right.setPower(0);
 
                 if (System.currentTimeMillis() >= (init_time + BREAK_TIME)) {
+                    init_time = System.currentTimeMillis();
                     //reverse initial direction next time
                     POWER = (-1) * POWER;
                     state = 0;
