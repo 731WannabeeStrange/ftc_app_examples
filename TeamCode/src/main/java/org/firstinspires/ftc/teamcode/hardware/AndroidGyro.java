@@ -1,20 +1,17 @@
-package org.firstinspires.ftc.teamcode;
+package org.firstinspires.ftc.teamcode.hardware;
 
 import android.content.Context;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
-
-import com.qualcomm.robotcore.eventloop.opmode.OpMode;
-import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 
 /**
  * Created by nicholas on 6/12/17.
  */
 
-@TeleOp
-public class AndroidGyro extends OpMode {
+public class AndroidGyro {
     private SensorManager sensorManager;
     private Sensor sensor;
     private static final float NS2S = 1.0f / 1000000000.0f;
@@ -23,11 +20,13 @@ public class AndroidGyro extends OpMode {
     private static final double EPSILON = 0.05f;
     private float omegaMagnitude = 0;
 
-    boolean reset_phone = false;
-    float angle = 0;
-    float deltaX = 0;
-    float abs_heading_phone = 0;
-    float heading_phone = 0;
+    static boolean reset = false;
+    static double x = 0;
+    static double y = 0;
+    static double z = 0;
+    double delta_x = 0;
+    double delta_y = 0;
+    double delta_z = 0;
 
     // Create a listener
     SensorEventListener gyroscopeSensorListener = new SensorEventListener() {
@@ -64,31 +63,21 @@ public class AndroidGyro extends OpMode {
                 deltaRotationVector[1] = sinThetaOverTwo * axisY;
                 deltaRotationVector[2] = sinThetaOverTwo * axisZ;
                 deltaRotationVector[3] = cosThetaOverTwo;
-                //Log.d("x: ", Float.toString(angle));
-                angle += 2 * (float) Math.toDegrees(deltaRotationVector[0]);
-                deltaX = -2 * (float) Math.toDegrees(deltaRotationVector[0]);
+                delta_x = 2 * Math.toDegrees(deltaRotationVector[0]);
+                delta_y = 2 * Math.toDegrees(deltaRotationVector[1]);
+                delta_z = 2 * Math.toDegrees(deltaRotationVector[2]);
+                x += delta_x;
+                y += delta_y;
+                z += delta_z;
             }
             timestamp = event.timestamp;
 
-            if (reset_phone) {
-                angle = 0;
-                deltaX = 0;
-                abs_heading_phone = 0;
-                reset_phone = false;
+            if (reset) {
+                x = 0;
+                y = 0;
+                z = 0;
+                reset = false;
             }
-
-            heading_phone = angle;
-
-            if (Math.abs(abs_heading_phone + deltaX) > 360) {
-                if ((abs_heading_phone + deltaX) > 0) {
-                    abs_heading_phone = abs_heading_phone + deltaX - 360;
-                } else {
-                    abs_heading_phone = abs_heading_phone + deltaX + 360;
-                }
-            } else {
-                abs_heading_phone += deltaX;
-            }
-
         }
 
 
@@ -98,17 +87,33 @@ public class AndroidGyro extends OpMode {
     };
 
     // Initialize all of the hardware variables
-    public void init() {
-        // Get the Android context to use to save the file
-        Context context = hardwareMap.appContext;
-
+    public AndroidGyro(Context context) {
         sensorManager = (SensorManager) context.getSystemService(Context.SENSOR_SERVICE);
         sensor = sensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE);
         sensorManager.registerListener(gyroscopeSensorListener, sensor, SensorManager.SENSOR_DELAY_FASTEST);
     }
 
-    public void loop() {
-        telemetry.addData("gyro", angle);
-        telemetry.update();
+    public static double wrapAngle(double angle) {
+        angle %= 360;
+        if (angle < 0) {
+            angle += 360;
+        }
+        return angle;
+    }
+
+    public static void reset() {
+        reset = true;
+    }
+
+    public static double getX() {
+        return x;
+    }
+
+    public static double getY() {
+        return y;
+    }
+
+    public static double getZ() {
+        return z;
     }
 }
