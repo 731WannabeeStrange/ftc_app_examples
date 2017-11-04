@@ -20,4 +20,8 @@ public class AndroidGyroExample extends OpMode {
     public void loop() {
         telemetry.addData("gyro", gyro.getX());
     }
+
+    public void stop() {
+        gyro.stop();
+    }
 }

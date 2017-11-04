@@ -15,12 +15,10 @@ public class AndroidGyro {
     private SensorManager sensorManager;
     private Sensor sensor;
     private static final float NS2S = 1.0f / 1000000000.0f;
-    private final float[] deltaRotationVector = new float[4];
     private float timestamp;
     private static final double EPSILON = 0.05f;
     private float omegaMagnitude = 0;
 
-    static boolean reset = false;
     static double x = 0;
     static double y = 0;
     static double z = 0;
@@ -56,28 +54,18 @@ public class AndroidGyro {
                 // in order to get a delta rotation from this sample over the timestep
                 // We will convert this axis-angle representation of the delta rotation
                 // into a quaternion before turning it into the rotation matrix.
-                float thetaOverTwo = omegaMagnitude * dT / 2.0f;
-                float sinThetaOverTwo = (float) Math.sin(thetaOverTwo);
-                float cosThetaOverTwo = (float) Math.cos(thetaOverTwo);
-                deltaRotationVector[0] = sinThetaOverTwo * axisX;
-                deltaRotationVector[1] = sinThetaOverTwo * axisY;
-                deltaRotationVector[2] = sinThetaOverTwo * axisZ;
-                deltaRotationVector[3] = cosThetaOverTwo;
-                delta_x = 2 * Math.toDegrees(deltaRotationVector[0]);
-                delta_y = 2 * Math.toDegrees(deltaRotationVector[1]);
-                delta_z = 2 * Math.toDegrees(deltaRotationVector[2]);
+                float theta = omegaMagnitude * dT;
+                float sinTheta = (float) Math.sin(theta);
+                delta_x = Math.toDegrees(sinThetaOverTwo * axisX);
+                delta_y = Math.toDegrees(sinThetaOverTwo * axisY);
+                delta_z = Math.toDegrees(sinThetaOverTwo * axisZ);
+
                 x += delta_x;
                 y += delta_y;
                 z += delta_z;
             }
-            timestamp = event.timestamp;
 
-            if (reset) {
-                x = 0;
-                y = 0;
-                z = 0;
-                reset = false;
-            }
+            timestamp = event.timestamp;
         }
 
 
@@ -102,7 +90,13 @@ public class AndroidGyro {
     }
 
     public static void reset() {
-        reset = true;
+        x = 0;
+        y = 0;
+        z = 0;
+    }
+    
+    public void stop() {
+        this.sensorManager.unregisterListener(gyroscopeSensorListener);
     }
 
     public static double getX() {
